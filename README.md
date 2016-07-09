@@ -23,6 +23,10 @@ new REPL(options)
 
 The message to be displayed when the user quits the REPL.
 
+### options.noBuiltins
+
+Set to true to disable the built-in commands (see below).
+
 ## Built-in commands
 
 When creating a new REPL, a few commands are already defined:

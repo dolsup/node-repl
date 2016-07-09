@@ -2,8 +2,13 @@
 import { REPL } from "./index"
 
 const repl = new class extends REPL {
-  evaluate(input: string) {
-    console.log(`You typed: ${input.toUpperCase()}`)
+  constructor() {
+    super({ 
+      noBuiltins: false
+    })
+  }
+  async evaluate(input: string) {
+    console.log(input.toUpperCase())
   }
 }
 

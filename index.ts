@@ -1,4 +1,3 @@
-
 /// <reference path="typings/index.d.ts" />
 
 import * as chalk from "chalk"
@@ -14,7 +13,8 @@ function isPromise(val) {
 
 export abstract class REPL {
 
-  byeMessage 
+  byeMessage: string
+  builtinCommands: boolean
   rl;
   lastError: Error | null = null
   aliases: { [name: string]: string }
@@ -22,6 +22,7 @@ export abstract class REPL {
   constructor(options?) {
     options = options || {}
     this.byeMessage = options.byeMessage || 'Bye.'
+    this.builtinCommands = !options.noBuiltins
   }
 
   start() {
@@ -36,27 +37,7 @@ export abstract class REPL {
         try { 
           const chunks = answer.split(' ')
               , command = chunks[0]
-          switch (command) {
-          case 'stack':
-            if (this.lastError === null)
-              error('No recent errors.')
-            else
-              console.log(this.lastError.stack)
-            read()
-            break
-          case 'quit':
-            console.log(this.byeMessage)
-            process.exit()
-          case 'alias':
-            const aliasName = chunks[1]
-            if (!aliasName)
-              throw new Error(`must provide an alias name`)
-            if (chunks.length < 3)
-              throw new Error(`must provide a command`)
-            this.aliases[aliasName] = chunks.slice(2).join(' ')
-            console.log(chalk.green(`Alias '${aliasName}' created.`))
-            break
-          default:
+              , ev = () => {
             const res = this.evaluate(answer)
             if (isPromise(res))
               res.then(() => read())
@@ -66,6 +47,32 @@ export abstract class REPL {
                   read()
                 })
           }
+          if (this.builtinCommands) {
+            switch (command) {
+            case 'stack':
+              if (this.lastError === null)
+                error('No recent errors.')
+              else
+                console.log(this.lastError.stack)
+              read()
+              break
+            case 'quit':
+              console.log(this.byeMessage)
+              process.exit()
+            case 'alias':
+              const aliasName = chunks[1]
+              if (!aliasName)
+                throw new Error(`must provide an alias name`)
+              if (chunks.length < 3)
+                throw new Error(`must provide a command`)
+              this.aliases[aliasName] = chunks.slice(2).join(' ')
+              console.log(chalk.green(`Alias '${aliasName}' created.`))
+              break
+            default:
+              ev()
+            }
+          } else
+            ev()
         } catch (e) {
           this.lastError = e
           error(e.message)
