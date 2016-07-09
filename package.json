@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/samvv/node-repl/issues"
   },
-  "homepage": "https://github.com/samvv/node-repl#readme"
+  "homepage": "https://github.com/samvv/node-repl#readme",
+  "dependencies": {
+    "chalk": "^1.1.3"
+  }
 }
