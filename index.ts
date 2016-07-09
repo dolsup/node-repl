@@ -14,13 +14,14 @@ function isPromise(val) {
 
 export abstract class REPL {
 
-  byeMessage = 'Bye.'
+  byeMessage 
   rl;
   lastError: Error | null = null
   aliases: { [name: string]: string }
 
   constructor(options?) {
     options = options || {}
+    this.byeMessage = options.byeMessage || 'Bye.'
   }
 
   start() {

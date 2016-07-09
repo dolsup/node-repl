@@ -13,6 +13,16 @@ const repl = class extends REPL {
 }
 ```
 
+## Options
+
+```js
+new REPL(options)
+```
+
+### options.byeMessage
+
+The message to be displayed when the user quits the REPL.
+
 ## Built-in commands
 
 When creating a new REPL, a few commands are already defined:
