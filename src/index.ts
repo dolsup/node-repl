@@ -1,0 +1,136 @@
+
+/// <reference path="../typings/index.d.ts" />
+
+import { EventEmitter } from "events"
+import * as chalk from "chalk"
+import * as readline from "readline"
+
+function error(msg: string) {
+  console.log(chalk.red(`Error: ${msg}`))
+}
+
+function isPromise(val) {
+  return (typeof val === 'object' || typeof val === 'function') && typeof val.then !== undefined
+}
+
+export abstract class REPL extends EventEmitter {
+
+  byeMessage: string
+  enableBuiltins: boolean
+  shortErrors: boolean
+  lastError: Error | null = null
+  aliases: { [name: string]: string }
+  private stopRequested: boolean
+  evaluators = []
+ 
+  handleError(e) {
+    this.lastError = e
+    if (this.shortErrors)
+      error(e.message)
+    else
+      console.log(e.stack)
+    this.emit('error', e)
+  }
+
+  constructor(options?) {
+    super()
+    options = options || {}
+    this.byeMessage = options.byeMessage || 'Bye.'
+    this.enableBuiltins = options.builtins === undefined ? true : !!options.builtins
+    this.shortErrors = options.shortErrors === undefined ? true : !!options.shortErrors
+  }
+
+  use(evaluator) {
+    this.evaluators.push(evaluator)
+  }
+
+  start() {
+    const read = () => {
+      if (this.stopRequested) {
+        this.stopRequested = false
+        return
+      }
+      const rl = readline.createInterface({
+        input: process.stdin
+      , output: process.stdout
+      })
+      const stopRL = () => rl.close()
+      this.on('stop', stopRL)
+      rl.question(' > ', (answer) => {
+        this.removeListener('stop', stopRL)
+        rl.close()
+        try { 
+          const chunks = answer.split(' ')
+              , command = chunks[0]
+              , ev = () => {
+                  const res = this.evaluate(answer)
+                  console.log(isPromise(res))
+                  if (isPromise(res)) {
+                    res
+                    .then(() => read())
+                    .catch(e => {
+                      this.handleError(e)
+                      read()
+                    })
+                  } else
+                    read()
+                }
+          if (this.enableBuiltins) {
+            switch (command) {
+            case 'stack':
+              if (this.lastError === null)
+                error('No recent errors.')
+              else
+                console.log(this.lastError.stack)
+              read()
+              break
+            case 'quit':
+              console.log(this.byeMessage)
+              process.exit()
+            case 'alias':
+              const aliasName = chunks[1]
+              if (!aliasName)
+                throw new Error(`must provide an alias name`)
+              if (chunks.length < 3)
+                throw new Error(`must provide a command`)
+              this.aliases[aliasName] = chunks.slice(2).join(' ')
+              console.log(chalk.green(`Alias '${aliasName}' created.`))
+              break
+            default:
+              ev()
+            }
+          } else
+            ev()
+        } catch (e) {
+          this.handleError(e)
+          read()
+        }
+      })
+    }
+    read()
+  }
+
+  evaluate(input: string) {
+    if (this.evaluators.length === 0)
+      throw new Error(`no evaluator defined`)
+    function ev(index, input) {
+      if (index < this.length) {
+        const res = this.evaluators[index].evaluate(input)
+        if (isPromise(res))
+          res
+            .then(output => ev(++index, output))
+            .catch(e => this.handleError(e))
+        else
+          ev(++index, res)
+      }
+    }
+    ev(0, input)
+  }
+
+  stop() {
+    this.stopRequested = true
+    this.emit('stop')
+  }
+
+}
+
