@@ -1,10 +1,10 @@
 
+import * as _ from "lodash"
 import * as micromatch from "micromatch"
 
-class AliasEvalutator {
+export class AliasEvaluator {
 
-  aliases: Map
-
+  aliases: Map<string, string>
 
   addAlias(pattern: string, result: string) {
     if (this.aliases.has(pattern))
@@ -12,8 +12,11 @@ class AliasEvalutator {
     this.aliases.set(pattern, result)
   }
 
-  constructor(aliases) {
-    this.aliases = new Map(aliases || {})
+  constructor(aliases?) {
+    this.aliases = new Map()
+    _.forEach(aliases, (result, pattern) => {
+      this.addAlias(pattern, result)
+    })
   }
 
   evaluate(input: string) {

@@ -6,6 +6,12 @@ export class EvaluationProfiler {
   times = []
   startTime: number
   currentInput: string
+  displayResults: boolean
+
+  constructor(options?) {
+    options = options || {}
+    this.displayResults = options.displayResults === undefined ? true : options.displayResults
+  }
 
   average(input: string) {
     const instances = this.times.filter(data => data.input === input)
@@ -27,10 +33,13 @@ export class EvaluationProfiler {
     return new class {
       evaluate(input: string) {
         const endTime = Date.now()
+            , delta = endTime - profiler.startTime
         profiler.times.push({
-          delta: endTime - profiler.startTime
+          delta: delta
         , input: profiler.currentInput
         })
+        if (profiler.displayResults)
+          console.log(`Command took ${delta} miliseconds to execute.`)
         return input
       }
     }

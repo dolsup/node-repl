@@ -63,17 +63,12 @@ export abstract class REPL extends EventEmitter {
           const chunks = answer.split(' ')
               , command = chunks[0]
               , ev = () => {
-                  const res = this.evaluate(answer)
-                  console.log(isPromise(res))
-                  if (isPromise(res)) {
-                    res
+                  this.evaluate(answer)
                     .then(() => read())
                     .catch(e => {
                       this.handleError(e)
                       read()
                     })
-                  } else
-                    read()
                 }
           if (this.enableBuiltins) {
             switch (command) {
@@ -113,18 +108,22 @@ export abstract class REPL extends EventEmitter {
   evaluate(input: string) {
     if (this.evaluators.length === 0)
       throw new Error(`no evaluator defined`)
-    function ev(index, input) {
-      if (index < this.length) {
-        const res = this.evaluators[index].evaluate(input)
-        if (isPromise(res))
-          res
-            .then(output => ev(++index, output))
-            .catch(e => this.handleError(e))
-        else
-          ev(++index, res)
+    return new Promise((accept, reject) => {
+      const ev = (index, input) => {
+        if (index === this.evaluators.length)
+          accept(input)
+        else {
+          const res = this.evaluators[index].evaluate(input)
+          if (isPromise(res))
+            res
+              .then(output => ev(++index, output))
+              .catch(reject)
+          else
+            ev(++index, res)
+        }
       }
-    }
-    ev(0, input)
+      ev(0, input)
+    })
   }
 
   stop() {
