@@ -51,7 +51,7 @@ Stop the running process.
 
 ### Alias evaluator
 
-This middleware adds support for aliases to your REPL. Add this **before** you add any other evaluation processing.
+This middleware adds support for aliases to your REPL. Add this **before** you add any other evaluation processing that wants to take advantage of this feature.
 
 **Note:** you must define your own instructions for letting your users add aliases.
 
@@ -80,6 +80,26 @@ const commands = new CommandEvaluator({
 
 repl.use(commands)
 ```
+
+#### addCommand(path, callback, scope?)
+
+Adds callback to the command tree on the specified `path`, optionally bound to
+`scope`.
+
+#### removeCommand(path, callback, scope?)
+
+Removes a command from the command tree on the specified path, and optionally
+from the specified `scope`.  If scope was specified and was disabled, will not
+attempt to remove it from the command tree.
+
+#### enableScope(name)
+
+Enables the scope specified by `name`, meaning that any commands bound to the
+scope `name` will be activated.
+
+#### disableScope(name)
+
+De-activates any command bound to scope `name`.
 
 ### Profiler
 
