@@ -16,15 +16,21 @@ repl.use({
 repl.start()
 ```
 
+## Events
+
+### errorCaught
+
+The REPL caught an error while running one of its evaluators.
+
+### close
+
+The REPL was closed.
+
 ## Options
 
 ```js
 new REPL(options)
 ```
-
-### options.byeMessage
-
-The message to be displayed when the user quits the REPL. Defaults to `Bye.`.
 
 ### options.builtins
 
@@ -34,6 +40,16 @@ Set to true to disable the built-in commands (see below). Defaults to true.
 
 Set true to hide the stack error trace when an error was caught by the
 REPL. Defaults to true.
+
+## Methods
+
+### start()
+
+Starts a new REPL using the current standard input and output.
+
+### stop()
+
+Stops the REPL, allowing it to finish execution of the last command entered.
 
 ## Built-in commands
 
