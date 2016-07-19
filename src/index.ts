@@ -15,7 +15,6 @@ function isPromise(val) {
 
 export abstract class REPL extends EventEmitter {
 
-  byeMessage: string
   enableBuiltins: boolean
   shortErrors: boolean
   lastError: Error | null = null
@@ -35,7 +34,6 @@ export abstract class REPL extends EventEmitter {
   constructor(options?) {
     super()
     options = options || {}
-    this.byeMessage = options.byeMessage || 'Bye.'
     this.enableBuiltins = options.builtins === undefined ? true : !!options.builtins
     this.shortErrors = options.shortErrors === undefined ? true : !!options.shortErrors
   }
@@ -59,47 +57,33 @@ export abstract class REPL extends EventEmitter {
       rl.question(' > ', (answer) => {
         this.removeListener('stop', stopRL)
         rl.close()
-        try { 
-          const chunks = answer.split(' ')
-              , command = chunks[0]
-              , ev = () => {
-                  this.evaluate(answer)
-                    .then(() => read())
-                    .catch(e => {
-                      this.handleError(e)
-                      read()
-                    })
-                }
-          if (this.enableBuiltins) {
-            switch (command) {
-            case 'stack':
-              if (this.lastError === null)
-                error('No recent errors.')
-              else
-                console.log(this.lastError.stack)
-              read()
-              break
-            case 'quit':
-              console.log(this.byeMessage)
-              process.exit()
-            case 'alias':
-              const aliasName = chunks[1]
-              if (!aliasName)
-                throw new Error(`must provide an alias name`)
-              if (chunks.length < 3)
-                throw new Error(`must provide a command`)
-              this.aliases[aliasName] = chunks.slice(2).join(' ')
-              console.log(chalk.green(`Alias '${aliasName}' created.`))
-              break
-            default:
-              ev()
-            }
-          } else
+        const chunks = answer.split(' ')
+            , command = chunks[0]
+            , ev = () => {
+                this.evaluate(answer)
+                  .then(() => read())
+                  .catch(e => {
+                    this.handleError(e)
+                    read()
+                  })
+              }
+        if (this.enableBuiltins) {
+          switch (command) {
+          case 'stack':
+            if (this.lastError === null)
+              error('No recent errors.')
+            else
+              console.log(this.lastError.stack)
+            read()
+            break
+          case 'quit':
+            this.emit('end')
+            break
+          default:
             ev()
-        } catch (e) {
-          this.handleError(e)
-          read()
-        }
+          }
+        } else
+          ev()
       })
     }
     read()
