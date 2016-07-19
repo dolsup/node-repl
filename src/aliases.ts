@@ -21,7 +21,7 @@ export class AliasEvaluator {
 
   evaluate(input: string) {
     for (const pair of this.aliases) {
-      const matches = micromatch(pair[0])
+      const matches = micromatch(input, pair[0])
       if (matches.length > 0) {
         return pair[1]
       }

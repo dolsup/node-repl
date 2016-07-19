@@ -8,8 +8,10 @@ Example:
 ```ts
 import { REPL } from "repl-cli"
 const repl = new REPL()
-repl.use(input => {
-  console.log(input.toUpperCase()
+repl.use({
+  evaluate(input) {
+    console.log(input.toUpperCase()
+  }
 })
 repl.start()
 ```
@@ -93,4 +95,8 @@ repl.use(profiler.start())
 // add your evaluators here
 repl.use(profiler.end())
 ```
+
+#### new EvaluationProfiler(options)
+
+ - **displayResults**: true to to let the profiler automatically flush results to the end user. Defaults to false.
 
