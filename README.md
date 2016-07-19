@@ -37,6 +37,8 @@ REPL. Defaults to true.
 
 ## Built-in commands
 
+:warning: **Deprecated**: this will soon be removed from the core
+
 When creating a new REPL, a few commands are already defined:
 
 ### stack
