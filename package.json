@@ -2,7 +2,7 @@
   "name": "repl-cli",
   "version": "1.1.1",
   "description": "A customizable REPL for NodeJS",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
