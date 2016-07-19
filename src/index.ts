@@ -21,14 +21,18 @@ export abstract class REPL extends EventEmitter {
   aliases: { [name: string]: string }
   private stopRequested: boolean
   evaluators = []
- 
-  handleError(e) {
-    this.lastError = e
+  
+  printError(e) {
     if (this.shortErrors)
       error(e.message)
     else
       console.log(e.stack)
-    this.emit('error', e)
+  }
+
+  handleError(e) {
+    this.lastError = e
+    this.printError(e)
+    this.emit('errorCaught', e)
   }
 
   constructor(options?) {
@@ -77,7 +81,7 @@ export abstract class REPL extends EventEmitter {
             read()
             break
           case 'quit':
-            this.emit('end')
+            this.stop()
             break
           default:
             ev()
@@ -112,7 +116,7 @@ export abstract class REPL extends EventEmitter {
 
   stop() {
     this.stopRequested = true
-    this.emit('stop')
+    this.emit('close')
   }
 
 }
