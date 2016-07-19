@@ -1,14 +1,16 @@
 Node REPL
 =========
 
-A simple customizable REPL for NodeJS.
+A extensible and customizable REPL for NodeJS. Features command tree evaluation, aliases and profiling.
 
 Example:
 
 ```ts
 import { REPL } from "repl-cli"
 const repl = new REPL()
-repl.use(input => { console.log(input.toUpperCase() })
+repl.use(input => {
+  console.log(input.toUpperCase()
+})
 repl.start()
 ```
 
@@ -39,27 +41,56 @@ When creating a new REPL, a few commands are already defined:
 
 Print the stack trace of the last caught error.
 
-### alias [oldname] [newname]
-
-Creates an alias for the given command.
-
 ### quit
 
 Stop the running process.
 
-## Evaluators
+## Evaluation Middlewares
+
+### Alias evaluator
+
+This middleware adds support for aliases to your REPL. Add this **before** you add any other evaluation processing.
+
+**Note:** you must define your own instructions for letting your users add aliases.
+
+```ts
+import { AliasEvaluator } from "repl-cli/lib/aliases"
+
+const aliases = new AliasEvaluator({
+  foo: "bar --baz -n 1
+})
+
+repl.use(aliases)
+```
 
 ### Command evaluator
 
-```
-import { commandEvaluator } from "repl-cli/commands"
+Allows nested commands in your application.
 
-const commands = {
+```ts
+import { CommandEvaluator } from "repl-cli/lib/commands"
+
+const commands = new CommandEvaluator({
   test: {
     console.log('It works!')
   }
-}
+})
 
-repl.use(commandEvaluator(commands))
+repl.use(commands)
+```
+
+### Profiler
+
+Profiles evaluation of the specified evaluators, in milliseconds.
+
+```ts
+import { EvaluationProfiler } from "repl-cli/lib/profiling"
+
+const profiler = new EvaluationProfiler({
+  displayResults: true
+})
+repl.use(profiler.start())
+// add your evaluators here
+repl.use(profiler.end())
 ```
 
