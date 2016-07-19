@@ -3,6 +3,8 @@ Node REPL
 
 A extensible and customizable REPL for NodeJS. Features command tree evaluation, aliases and profiling.
 
+:milky_way: As seen in [GalacticJS](http://github.com/GalacticJS).
+
 Example:
 
 ```ts
@@ -34,7 +36,7 @@ new REPL(options)
 
 ### options.builtins
 
-Set to true to disable the built-in commands (see below). Defaults to true.
+Set to false to disable the built-in commands (see below). Defaults to true.
 
 ### options.shortErrors
 
