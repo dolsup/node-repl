@@ -12,7 +12,7 @@ import { REPL } from "repl-cli"
 const repl = new REPL()
 repl.use({
   evaluate(input) {
-    console.log(input.toUpperCase()
+    console.log(input.toUpperCase())
   }
 })
 repl.start()
